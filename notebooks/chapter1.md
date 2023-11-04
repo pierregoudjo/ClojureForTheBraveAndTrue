@@ -21,7 +21,7 @@ clj
 
 The outpout should look like the picture below and you could start interacting with the program at the command line:
 
-![repl](assets/repl.png)
+![repl](https://github.com/pierregoudjo/ClojureForTheBraveAndTrue/assets/1331326/c642d90d-dd80-4923-8385-fb918c3566a2)
 
 
 You could also use the Socket REPL to interact with the REPL over the wire or from another program. To launch a socket REPL on a specific port, run the following command:
