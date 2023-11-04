@@ -429,8 +429,8 @@ Notice that using get to test whether a set contains nil will always return nil,
 You may have noticed that the treatment of data structures so far doesn’t include a description of how to create new types or classes. The reason is that Clojure’s emphasis on simplicity encourages you to reach for the built-in data structures first.
 
 
-	It is better to have 100 functions operate on one data structure than 10 functions on 10 data structures.
-	—Alan Perlis
+> It is better to have 100 functions operate on one data structure than 10 functions on 10 data structures.
+> 	—Alan Perlis
 
 You’ll learn more about this aspect of Clojure’s philosophy in the coming chapters. For now, keep an eye out for the ways that you gain code reusability by sticking to basic data structures.
 
