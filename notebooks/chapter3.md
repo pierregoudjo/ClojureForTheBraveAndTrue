@@ -434,3 +434,226 @@ You may have noticed that the treatment of data structures so far doesn’t incl
 
 You’ll learn more about this aspect of Clojure’s philosophy in the coming chapters. For now, keep an eye out for the ways that you gain code reusability by sticking to basic data structures.
 
+## Functions
+
+### Calling functions
+
+We've seen many examples of function calls:
+
+```clj
+(+ 1 2 3 4)
+(* 1 2 3 4)
+(first [1 2 3 4])
+```
+
+All Clojure operations have the same syntax: *opening parenthesis, operator, operands, closing parentheses*. *Function call* is another term for an operation where the operation is a function or a *function expression* (an expression that returns a function).
+
+This lets you write some pretty interesting code. Here's a function expression that returns the `+` (addition) function:
+
+```clj
+(or + -)
+```
+
+That return value is the string representation of the addition function. You can also use this expression as the operator in another expression:
+
+```clj
+((or + -) 1 2 3)
+```
+
+Because `(or + -)` returns `+`, this expression evaluates to the sum of `1`, `2`, `3`, returning `6`.
+
+here are a couple more valid functions calls that each retun `6`:
+
+```clj
+((and (= 1 1) +) 1 2 3)
+((first [+ 0]) 1 2 3)
+```
+
+In the first example, the return value of `and` is the first falsey value or the last thruthy value. In this case, `+` is returned because it's the last thruthy value, and is then applied to the arguments `1 2 3`, returning `6`. In the second example, the return value of `first` is the first element in a sequence, which is `+` in this case.
+
+However, these aren't valide function calls, because numbers and strings aren't functions:
+
+```cljs
+(1 2 3 4)
+("test" 1 2 3)
+```
+
+If you run these in your REPL, you'll get something like this:
+
+```cljs
+ClassCastException: class java.lang.Long cannot be cast to class clojure.lang.IFn (java.lang.Long is in module java.base of loader 'bootstrap'; clojure.lang.IFn is in unnamed module of loader 'app')
+```
+
+You’re likely to see this error many times as you continue with Clojure: <x> cannot be cast to clojure.lang.IFn just means that you’re trying to use something as a function when it’s not.
+
+Function flexibility doesn’t end with the function expression! Syntactically, functions can take any expressions as arguments—including other functions. Functions that can either take a function as an argument or return a function are called higher-order functions. Programming languages with higher-order functions are said to support first-class functions because you can treat functions as values in the same way you treat more familiar data types like numbers and vectors.
+
+Take the `map` function (not to be confused with the map data structure), for instance. `map` creates a new list by applying a function to each member of a collection. Here, the `inc` function increments a number by 1:
+
+```clj
+(inc 1.1)
+(map inc [0 1 2 3])
+```
+
+(Note that `map` doesn’t return a vector, even though we supplied a vector as an argument. For now, just trust that this is okay and expected.)
+
+Clojure (and all Lisps) allows you to create functions that generalize over processes. `map` allows you to generalize the process of transforming a collection by applying a function—any function—over any collection.
+
+The last detail that you need know about function calls is that Clojure evaluates all function arguments recursively before passing them to the function. Here’s how Clojure would evaluate a function call whose arguments are also function calls:
+
+```cljs
+(+ (inc 199) (/ 100 (- 7 2)))
+(+ 200 (/ 100 (- 7 2))) ; evaluated "(inc 199)"
+(+ 200 (/ 100 5)) ; evaluated (- 7 2)
+(+ 200 20) ; evaluated (/ 100 5)
+220 ; final evaluation
+```
+
+The function call kicks off the evaluation process, and all subforms are evaluated before applying the `+` function.
+
+
+### Function Calls, Macro Calls, and Special Forms
+
+In the previous section, you learned that function calls are expressions that have a function expression as the operator. The two other kinds of expressions are macro calls and special forms. You’ve already seen a couple of special forms: definitions and `if` expressions.
+
+You’ll learn everything there is to know about macro calls and special forms in Chapter 7. For now, the main feature that makes special forms “special” is that, unlike function calls, *they don’t always evaluate all of their operands*.
+
+Take `if`, for example. This is its general structure:
+
+```cljs
+(if boolean-form
+  then-form
+  optional-else-form)
+```
+
+Now imagine you had an if statement like this:
+
+```cljs
+(if good-mood
+  (tweet walking-on-sunshine-lyrics)
+  (tweet mopey-country-song-lyrics))
+```
+
+Clearly, in an `if` expression like this, we want Clojure to evaluate only one of the two branches. If Clojure evaluated both `tweet` function calls, your Twitter followers would end up very confused.
+
+Another feature that differentiates special forms is that you can’t use them as arguments to functions. In general, special forms implement core Clojure functionality that just can’t be implemented with functions. Clojure has only a handful of special forms, and it’s pretty amazing that such a rich language is implemented with such a small set of building blocks.
+
+Macros are similar to special forms in that they evaluate their operands differently from function calls, and they also can’t be passed as arguments to functions. But this detour has taken long enough; it’s time to learn how to define functions!
+
+### Defining Functions
+
+Function definitions are composed of five main parts:
+
+- defn
+- Function name
+- A docstring describing the function (optional)
+- Parameters listed in brackets
+- Function body
+
+Here’s an example of a function definition and a sample call of the function:
+
+```clj
+(defn too-enthusiastic ; too-enthusiastic is the name of the function
+  "Return a cheer that might be a bit too enthusiastic" ; here is the docstring
+  [name] ; the parameter list
+  (str "OH. MY. GOD! " name " YOU ARE MOST DEFINITELY LIKE THE BEST " "MAN SLASH WOMAN EVER I LOVE YOU AND WE SHOULD RUN AWAY SOMEWHERE"))
+
+(too-enthusiastic "Zelda")
+```
+
+#### The Docstring
+
+The *docstring* is a useful way to describe and document your code. You can view the docstring for a function in the REPL with `(doc fn-name)`—for example, `(doc map)`. The docstring also comes into play if you use a tool to generate documentation for your code.
+
+#### Parameters and Arity
+Clojure functions can be defined with zero or more parameters. The values you pass to functions are called *arguments*, and the arguments can be of any type. The number of parameters is the function’s arity. Here are some function definitions with different arities:
+
+```clj
+(defn no-params
+  []
+  "I take no parameters!")
+(defn one-param
+  [x]
+  (str "I take one parameter: " x))
+(defn two-params
+  [x y]
+  (str "Two parameters! That's nothing! Pah! I will smoosh them "
+  "together to spite you! " x y))
+```
+
+Functions also support arity overloading. This means that you can define a function so a different function body will run depending on the arity. Here’s the general form of a multiple-arity function definition. Notice that each arity definition is enclosed in parentheses and has an argument list:
+
+```cljs
+(defn multi-arity
+  ;; 3-arity arguments and body
+  ([first-arg second-arg third-arg]
+     (do-things first-arg second-arg third-arg))
+  ;; 2-arity arguments and body
+  ([first-arg second-arg]
+     (do-things first-arg second-arg))
+  ;; 1-arity arguments and body
+  ([first-arg]
+     (do-things first-arg)))
+```
+
+Arity overloading is one way to provide default values for arguments. In the following example, "karate" is the default argument for the chop-type parameter:
+
+```clj
+(defn x-chop
+  "Describe the kind of chop you're inflicting on someone"
+  ([name chop-type]
+     (str "I " chop-type " chop " name "! Take that!"))
+  ([name]
+     (x-chop name "karate")))
+```
+
+We can call the `x-chop` function with two arguments:
+```clj
+(x-chop "Kanye West" "slap")
+```
+
+And we can also call `x-chop` with only one arguments and `karate` will be used as default `chop-type`:
+
+```clj
+(x-chop "Kanye East")
+```
+
+We can also make each arity do something completely unrelated:
+
+```clj
+(defn weird-arity
+  ([]
+     "Destiny dressed you this morning, my friend, and now Fear is
+     trying to pull off your pants. If you give up, if you give in,
+     you're gonna end up naked with Fear just standing there laughing
+     at your dangling unmentionables! - the Tick")
+  ([number]
+     (inc number)))
+```
+
+The 0-arity body returns a wise quote the 1-arity body increments a number.
+
+Clojure also allows you to define variable-arity functions by including a *rest parameter*, as in “put the rest of these arguments in a list with the following name.” The rest parameter is indicated by an ampersand (&):
+
+```clj
+(defn codger-communication
+  [whippersnapper]
+  (str "Get off my lawn, " whippersnapper "!!!"))
+
+(defn codger
+  [& whippersnappers]
+  (map codger-communication whippersnappers))
+
+(codger "Billy" "Anne-Marie" "The Incredible Bulk")
+```
+
+We can mix normal parameters and rest parameters but the rest parameter has to come last:
+
+```clj
+(defn favorite-things
+  [name & things]
+  (str "Hi, " name ", here are my favorite things: "
+       (clojure.string/join ", " things)))
+
+(favorite-things "Doreen" "gum" "shoes" "kara-te")
+```
