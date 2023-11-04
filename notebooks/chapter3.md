@@ -314,3 +314,123 @@ You can provide default value, as with `get`:
 ```
 
 Using a keyword as a function is pleasantly succinct, and Real Clojurists do it all the time. You should do it too!
+
+### Vectors
+A vector is similar to an array, i that it is a 0-indexed collection. For example, here's a vector literal:
+
+```clj
+[3 2 1]
+```
+
+Here we're returning the 0th element of a vector:
+```clj
+(get [3 2 1] 0)
+```
+
+Here's another example of getting by index:
+
+```clj
+(get ["a" {:name "Pugsley Winterbottom"} "c"] 1)
+```
+
+Vector elements can be of any type, and you can mix types.
+
+We can create vectors with the vecto function:
+
+```clj
+(vector "creepy" "full" "moon")
+```
+
+`conj` is used to *add* aditional elements to a vector. Elements are added to the end of the vector.
+
+```clj
+(conj [1 2 3] 1)
+```
+
+Vectors aren’t the only way to store sequences; Clojure also has lists.
+
+### Lists
+
+List are similar to vectors in that they're linear collections of values. but there are some differences. We can't retrieve list elements with `get`. To write a list literal, just insert the elements into parentheses and use a single quote at the beginning:
+
+```clj
+'(1 2 3 4)
+```
+
+Notice that when the REPL prints out the list, it doesn't include the single quote. We'll come back to why later. To retrieve an element from a list, use the `nth` function.
+
+```clj
+(nth '(:a :b :c) 0)
+(nth '(:a :b :c) 2)
+```
+
+It is good to know that using `nth` is slower than `get` because it has to traverse all *n* elements of a list to get the *n*th, whereas it only takes a few hops at most to access a vector element by ts index.
+
+List values can be of any type and lists can be created with the `list` function:
+
+```clj
+(list 1 "two" {3 4})
+```
+
+Elements can be added to the beginning of a list:
+
+```clj
+(conj '(1 2 3) 4)
+```
+
+A good rule of thumb to know when to use list or vector:
+- for macros or a need to add items at the beginning of a sequence use **list**
+- otherwise, use **vector**
+
+### Sets
+
+Sets are collection of unique values. Clojure has two kinds of sets: hash sets and sorted sets. We'll focus on hashed set as they are used more often. Here an example of literal notation for a hash set:
+
+```clj
+#{"kurt vonnegut" 20 :icicle}
+```
+
+We can also use `hash-set` to create a set:
+
+```clj
+(hash-set 1 1 2 2)
+```
+
+Note that multiple instances of a value become one unique value in the set. trying to add a value already contained in the set, will still lead to only one of that value:
+
+```clj
+(conj #{:a :b} :b)
+```
+
+We can create set from existing vectors and lists by using the `set` function:
+
+```clj
+(set [3 3 3 4 4])
+```
+
+We can check membership using the `contains?`or `get` functions or by using a keyword as a function with the set as its argument:
+
+```clj
+(contains? #{:a :b} :a)
+(contains? #{:a :b} 3)
+(contains? #{nil} nil)
+
+(:a #{:a :b})
+
+(get #{:a :b} :a)
+(get #{:a nil} nil)
+(get #{:a :b} "kurt vonnegut")
+```
+
+Notice that using get to test whether a set contains nil will always return nil, which is confusing. contains? may be the better option when you’re testing specifically for set membership.
+
+### Simplicity
+
+You may have noticed that the treatment of data structures so far doesn’t include a description of how to create new types or classes. The reason is that Clojure’s emphasis on simplicity encourages you to reach for the built-in data structures first.
+
+
+	It is better to have 100 functions operate on one data structure than 10 functions on 10 data structures.
+	—Alan Perlis
+
+You’ll learn more about this aspect of Clojure’s philosophy in the coming chapters. For now, keep an eye out for the ways that you gain code reusability by sticking to basic data structures.
+
