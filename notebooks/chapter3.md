@@ -657,3 +657,174 @@ We can mix normal parameters and rest parameters but the rest parameter has to c
 
 (favorite-things "Doreen" "gum" "shoes" "kara-te")
 ```
+
+#### Destructuring
+
+The basic idea behind destructuring is that it lets you concisely bind names to values within a collection.
+
+```clj
+(defn my-first
+  [[first-thing]]
+  first-thing)
+
+(my-first ["oven" "bike" "war-axe"])
+```
+
+The `my-first` function associates the symbol `first-thing` with the first element of the vector that was passed in as an argument.
+
+When destructuring a vector or a list, you can name as many elementsas you want and also use rest parameters:
+
+```clj
+(defn chooser
+  [[first-choice second-choice & unimportant-choices]]
+  (clojure.string/join "\n" [(str "Your first choice is: " first-choice)
+                            (str "Your second choice is: " second-choice)
+                            (str "We're ignoring the rest of your choices."
+                                 "Here they are in case you need to cry over them: "
+                                 (clojure.string/join ", " unimportant-choices))]))
+
+(chooser ["Marmalade" "Handsome Jack" "Pigpen" "Aquaman"])
+```
+
+Here, the rest parameter unimportant-choices handles any number of additional choices from the user after the first and second.
+
+We can also destructure maps by providing a map as a parameter:
+
+```clj
+(defn announce-treasure-location
+  [{lat :lat lng :lng}]
+  (clojure.string/join "\n" [(str "Treasure lat: " lat)
+                             (str "Treasure lng: " lng)]))
+
+(announce-treasure-location {:lat 28.22 :lng 81.33})
+```
+
+The previous function definition associates the name `lat` with the value corresponding to the key `:lat` and the name `lng` with the value corresponding to the key `:lng`.
+
+To simply break keywords out of a map, there's a shorter syntax for that. This as the same result as the previous example:
+
+```clj
+
+(defn announce-treasure-location2
+  [{:keys [lat lng]}]
+  (clojure.string/join "\n" [(str "Treasure lat: " lat)
+                             (str "Treasure lng: " lng)]))
+
+(announce-treasure-location2 {:lat 28.22 :lng 81.33})
+```
+
+We can retain access to the original map argument by using the :as keyword. In the following example, the original map is accessed with `treasure-location`:
+
+```cljs
+(defn receive-treasure-location
+  [{:keys [lat lng] :as treasure-location}]
+  (println (str "Treasure lat: " lat))
+  (println (str "Treasure lng: " lng))
+
+  ;; One would assume that this would put in new coordinates for your ship
+  (steer-ship! treasure-location))
+```
+
+Destructuring is a way of instructing Clojure on how to associate names with vakues in a list, map, set or vector. Now, on to the part of the function that actually does something: the function body!
+
+```clj
+(defn illustrative-function
+  []
+  (+ 1 304)
+  30
+  "joe")
+
+(illustrative-function)
+```
+
+Here's another function body, which uses an `if` expression:
+
+```clj
+(defn number-comment
+  [x]
+  (if (> x 6)
+    "Oh my gosh! What a big number!"
+    "Thats number's OK, I guess"))
+
+(number-comment 5)
+(number-comment 7)
+```
+
+#### All Functions Are Created Equal
+One final note: Clojure has no privileged functions. + is just a function, - is just a function, and inc and map are just functions. They’re no better than the functions you define yourself.
+
+#### Anonymous Functions
+
+In Clojure, functions doesn't need to have names. It is possible to create anonymous functions with the `fn` form:
+
+```cljs
+(fn [param-list]
+  function-body)
+```
+
+Looks a lot like `defn`, doesn't it? Here some examples:
+
+```clj
+(map (fn [name] (str "Hi, " name))
+     ["Dath Vader" "Mr Magoo"])
+
+((fn [x] (* x 3)) 8)
+```
+
+We could treat `fn` nearly identically to the way we treat `defn`: the parameter lists, the function body, the argument destructuring, the rest parameters work the same. We could even associate an anonymous function to a name, which shouldn't come as a surprise.
+
+```clj
+(def my-special-multiplier (fn [x] (* x 3)))
+(my-special-multiplier 12)
+```
+
+Clojure also offers another, more compact way to create anonymous functions. Here what it looks like:
+
+```clj
+#(* % 3)
+```
+
+Whoa, that looks weird. Go ahead and apply that weird-looking function:
+
+```clj
+(#(* % 3) 8)
+```
+
+Here's an example of passing an anonymous function as an argument to `map`.
+
+```clj
+(map #(str "Hi, " % ) ["Darth Vader" "Mr. Magoo"])
+```
+
+The percent sign, `%`, indicates the argument passed to the function. If the anonymous function takes multiples arguments, we distinguish theml like this: `%1`, `%2`, `%3`, and so on. `%` is equivalent to `%1`:
+
+```clj
+(#(str %1 " and " %2) "cornbread" "butter beans")
+```
+
+We can also pass a rest parameter with `%&`:
+
+```clj
+(#(identity %&) 1 "blarg" :yip)
+```
+
+Here, `identity` retuns the argument it's given without altering it. Rest arguments are stored as lists, so the function application returns a list of all parameters.
+
+For simple anonymous function, this style is the best because it's visually compact. On the other hand, it can become unreadable for longer more complex function. In this case, best using the `fn` style function.
+
+#### Returning function
+
+Functions can return other functions. Here's an example:
+
+```clj
+(defn inc-maker
+  "Create a custom incrementor"
+  [inc-by]
+  #(+ % inc-by))
+
+(def inc3 (inc-maker 3))
+
+(inc3 7)
+```
+
+Here, `inc-by` is in scope, so the returned function has access to it even when the returned function is used outside `inc-maker`.
