@@ -828,3 +828,28 @@ Functions can return other functions. Here's an example:
 ```
 
 Here, `inc-by` is in scope, so the returned function has access to it even when the returned function is used outside `inc-maker`.
+
+## Exercices
+
+### Exercice 1
+
+**Use the `str`, `vector`, `list`, `hash-map` and `hash-set` functions**
+
+```clj
+(str "A string " "with " 3 " parts")
+(vector "A" "Nice" "Vector" "With" "a" ":keyword")
+(list "A" "Nice" "List")
+(hash-map :a "A Value" :b "B Value")
+(hash-set "Value" "In" "A" "Set" "Set")
+```
+
+### Exercice 2
+
+**Write a function that takes a number and adds 100 to it**
+
+```clj
+(defn add100 
+  [n] 
+  (+ n 100))
+(add100 10)
+```
