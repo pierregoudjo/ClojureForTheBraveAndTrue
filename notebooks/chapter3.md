@@ -853,3 +853,51 @@ Here, `inc-by` is in scope, so the returned function has access to it even when 
   (+ n 100))
 (add100 10)
 ```
+
+### Exercice 3
+
+**Write a function, dec-maker, that works exactly like the function inc-maker except with subtraction**
+
+```clj
+(defn dec-maker 
+  [n] 
+  (fn [x](- x n)))
+                                                                                    
+(def dec9 (dec-maker 9))
+(dec9 10)
+```
+
+It also possible to write the anonymous function with a compact form:
+
+```clj
+(defn dec-maker2 
+  [n]
+  #(- % n))
+
+(def dec9-2 (dec-maker2 9))
+(dec9-2 10)
+```
+
+### Exercice 4
+
+**Write a function, mapset, that works like map except the return value is a set:**
+```cljs
+(mapset inc [1 1 2 2])
+; => #{2 3}
+```
+
+```clj
+(defn mapset [fn seq]
+  (set(map fn seq)))
+(mapset inc [1 1 2 2])
+```
+
+We can also use `let` to store intermediate result
+
+```clj
+(defn mapset2 [fn seq]
+  (let [result (map fn seq)]
+    (set result)))
+
+(mapset2 inc [1 1 2 2])
+```
